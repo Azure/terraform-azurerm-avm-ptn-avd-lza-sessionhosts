@@ -195,19 +195,19 @@ variable "virtual_machine_extension" {
     name                        = string
     publisher                   = string
     type                        = string
-    type_handler_version        = string
     virtual_machine_id          = string
-    auto_upgrade_minor_version  = bool
-    automatic_upgrade_enabled   = bool
-    failure_suppression_enabled = bool
-    protected_settings          = string
+    type_handler_version        = string
+    auto_upgrade_minor_version  = optional(bool)
+    automatic_upgrade_enabled   = optional(bool)
+    failure_suppression_enabled = optional(bool)
+    protected_settings          = optional(string)
     protected_settings_from_key_vault = object({
-      secret_url      = string
-      source_vault_id = string
+      secret_url      = optional(string)
+      source_vault_id = optional(string)
     })
-    provision_after_extensions = list(string)
-    settings                   = string
-    tags                       = map(string)
+    provision_after_extensions = optional(list(string))
+    settings                   = optional(string)
+    tags                       = optional(map(string))
     timeouts = object({
       create = optional(string)
       delete = optional(string)
@@ -218,115 +218,9 @@ variable "virtual_machine_extension" {
   description = "All attributes related to configuring a Virtual Machine Extension."
 }
 
-variable "virtual_machine_extension_name" {
-  type        = string
-  description = "(Required) The name of the virtual machine extension peering. Changing this forces a new resource to be created."
-  nullable    = false
-}
-
-variable "virtual_machine_extension_publisher" {
-  type        = string
-  description = "(Required) The publisher of the extension, available publishers can be found by using the Azure CLI. Changing this forces a new resource to be created."
-  nullable    = false
-}
-
-variable "virtual_machine_extension_type" {
-  type        = string
-  description = "(Required) The type of extension, available types for a publisher can be found using the Azure CLI."
-  nullable    = false
-}
-
-variable "virtual_machine_extension_type_handler_version" {
-  type        = string
-  description = "(Required) Specifies the version of the extension to use, available versions can be found using the Azure CLI."
-  nullable    = false
-}
-
-variable "virtual_machine_extension_virtual_machine_id" {
-  type        = string
-  description = "(Required) The ID of the Virtual Machine. Changing this forces a new resource to be created"
-  nullable    = false
-}
-
 variable "vm_sku_size" {
   type        = string
   description = "The SKU size of the Virtual Machine."
-}
-
-variable "windows_virtual_machine_admin_password" {
-  type        = string
-  description = "(Required) The Password which should be used for the local-administrator on this Virtual Machine. Changing this forces a new resource to be created."
-  nullable    = false
-  sensitive   = true
-}
-
-variable "windows_virtual_machine_admin_username" {
-  type        = string
-  description = "(Required) The username of the local administrator used for the Virtual Machine. Changing this forces a new resource to be created."
-  nullable    = false
-}
-
-variable "windows_virtual_machine_location" {
-  type        = string
-  description = "(Required) The Azure location where the Windows Virtual Machine should exist. Changing this forces a new resource to be created."
-  nullable    = false
-}
-
-variable "windows_virtual_machine_name" {
-  type        = string
-  description = "(Required) The name of the Windows Virtual Machine. Changing this forces a new resource to be created."
-  nullable    = false
-}
-
-variable "windows_virtual_machine_network_interface_ids" {
-  type        = list(string)
-  description = "(Required). A list of Network Interface IDs which should be attached to this Virtual Machine. The first Network Interface ID in this list will be the Primary Network Interface on the Virtual Machine."
-  nullable    = false
-}
-
-variable "windows_virtual_machine_os_disk" {
-  type = object({
-    caching                          = string
-    disk_encryption_set_id           = optional(string)
-    disk_size_gb                     = optional(number)
-    name                             = optional(string)
-    secure_vm_disk_encryption_set_id = optional(string)
-    security_encryption_type         = optional(string)
-    storage_account_type             = string
-    write_accelerator_enabled        = optional(bool)
-    diff_disk_settings = optional(object({
-      option    = string
-      placement = optional(string)
-    }))
-  })
-  description = <<-EOT
- - `caching` - (Required) The Type of Caching which should be used for the Internal OS Disk. Possible values are `None`, `ReadOnly` and `ReadWrite`.
- - `disk_encryption_set_id` - (Optional) The ID of the Disk Encryption Set which should be used to Encrypt this OS Disk. Conflicts with `secure_vm_disk_encryption_set_id`.
- - `disk_size_gb` - (Optional) The Size of the Internal OS Disk in GB, if you wish to vary from the size used in the image this Virtual Machine is sourced from.
- - `name` - (Optional) The name which should be used for the Internal OS Disk. Changing this forces a new resource to be created.
- - `secure_vm_disk_encryption_set_id` - (Optional) The ID of the Disk Encryption Set which should be used to Encrypt this OS Disk when the Virtual Machine is a Confidential VM. Conflicts with `disk_encryption_set_id`. Changing this forces a new resource to be created.
- - `security_encryption_type` - (Optional) Encryption Type when the Virtual Machine is a Confidential VM. Possible values are `VMGuestStateOnly` and `DiskWithVMGuestState`. Changing this forces a new resource to be created.
- - `storage_account_type` - (Required) The Type of Storage Account which should back this the Internal OS Disk. Possible values are `Standard_LRS`, `StandardSSD_LRS`, `Premium_LRS`, `StandardSSD_ZRS` and `Premium_ZRS`. Changing this forces a new resource to be created.
- - `write_accelerator_enabled` - (Optional) Should Write Accelerator be Enabled for this OS Disk? Defaults to `false`.
-
- ---
- `diff_disk_settings` block supports the following:
- - `option` - (Required) Specifies the Ephemeral Disk Settings for the OS Disk. At this time the only possible value is `Local`. Changing this forces a new resource to be created.
- - `placement` - (Optional) Specifies where to store the Ephemeral Disk. Possible values are `CacheDisk` and `ResourceDisk`. Defaults to `CacheDisk`. Changing this forces a new resource to be created.
-EOT
-  nullable    = false
-}
-
-variable "windows_virtual_machine_resource_group_name" {
-  type        = string
-  description = "(Required) The name of the Resource Group in which the Windows Virtual Machine should be exist. Changing this forces a new resource to be created."
-  nullable    = false
-}
-
-variable "windows_virtual_machine_size" {
-  type        = string
-  description = "(Required) The SKU which should be used for this Virtual Machine, such as `Standard_F2`."
-  nullable    = false
 }
 
 // required AVM interfaces 
