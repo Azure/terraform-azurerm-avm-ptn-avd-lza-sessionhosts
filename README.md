@@ -27,6 +27,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.71)
 
+- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
+
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Providers
@@ -252,19 +254,19 @@ object({
     name                        = string
     publisher                   = string
     type                        = string
-    type_handler_version        = string
     virtual_machine_id          = string
-    auto_upgrade_minor_version  = bool
-    automatic_upgrade_enabled   = bool
-    failure_suppression_enabled = bool
-    protected_settings          = string
+    type_handler_version        = string
+    auto_upgrade_minor_version  = optional(bool)
+    automatic_upgrade_enabled   = optional(bool)
+    failure_suppression_enabled = optional(bool)
+    protected_settings          = optional(string)
     protected_settings_from_key_vault = object({
-      secret_url      = string
-      source_vault_id = string
+      secret_url      = optional(string)
+      source_vault_id = optional(string)
     })
-    provision_after_extensions = list(string)
-    settings                   = string
-    tags                       = map(string)
+    provision_after_extensions = optional(list(string))
+    settings                   = optional(string)
+    tags                       = optional(map(string))
     timeouts = object({
       create = optional(string)
       delete = optional(string)
@@ -274,116 +276,9 @@ object({
   })
 ```
 
-### <a name="input_virtual_machine_extension_name"></a> [virtual\_machine\_extension\_name](#input\_virtual\_machine\_extension\_name)
-
-Description: (Required) The name of the virtual machine extension peering. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_virtual_machine_extension_publisher"></a> [virtual\_machine\_extension\_publisher](#input\_virtual\_machine\_extension\_publisher)
-
-Description: (Required) The publisher of the extension, available publishers can be found by using the Azure CLI. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_virtual_machine_extension_type"></a> [virtual\_machine\_extension\_type](#input\_virtual\_machine\_extension\_type)
-
-Description: (Required) The type of extension, available types for a publisher can be found using the Azure CLI.
-
-Type: `string`
-
-### <a name="input_virtual_machine_extension_type_handler_version"></a> [virtual\_machine\_extension\_type\_handler\_version](#input\_virtual\_machine\_extension\_type\_handler\_version)
-
-Description: (Required) Specifies the version of the extension to use, available versions can be found using the Azure CLI.
-
-Type: `string`
-
-### <a name="input_virtual_machine_extension_virtual_machine_id"></a> [virtual\_machine\_extension\_virtual\_machine\_id](#input\_virtual\_machine\_extension\_virtual\_machine\_id)
-
-Description: (Required) The ID of the Virtual Machine. Changing this forces a new resource to be created
-
-Type: `string`
-
 ### <a name="input_vm_sku_size"></a> [vm\_sku\_size](#input\_vm\_sku\_size)
 
 Description: The SKU size of the Virtual Machine.
-
-Type: `string`
-
-### <a name="input_windows_virtual_machine_admin_password"></a> [windows\_virtual\_machine\_admin\_password](#input\_windows\_virtual\_machine\_admin\_password)
-
-Description: (Required) The Password which should be used for the local-administrator on this Virtual Machine. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_windows_virtual_machine_admin_username"></a> [windows\_virtual\_machine\_admin\_username](#input\_windows\_virtual\_machine\_admin\_username)
-
-Description: (Required) The username of the local administrator used for the Virtual Machine. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_windows_virtual_machine_location"></a> [windows\_virtual\_machine\_location](#input\_windows\_virtual\_machine\_location)
-
-Description: (Required) The Azure location where the Windows Virtual Machine should exist. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_windows_virtual_machine_name"></a> [windows\_virtual\_machine\_name](#input\_windows\_virtual\_machine\_name)
-
-Description: (Required) The name of the Windows Virtual Machine. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_windows_virtual_machine_network_interface_ids"></a> [windows\_virtual\_machine\_network\_interface\_ids](#input\_windows\_virtual\_machine\_network\_interface\_ids)
-
-Description: (Required). A list of Network Interface IDs which should be attached to this Virtual Machine. The first Network Interface ID in this list will be the Primary Network Interface on the Virtual Machine.
-
-Type: `list(string)`
-
-### <a name="input_windows_virtual_machine_os_disk"></a> [windows\_virtual\_machine\_os\_disk](#input\_windows\_virtual\_machine\_os\_disk)
-
-Description: - `caching` - (Required) The Type of Caching which should be used for the Internal OS Disk. Possible values are `None`, `ReadOnly` and `ReadWrite`.
-- `disk_encryption_set_id` - (Optional) The ID of the Disk Encryption Set which should be used to Encrypt this OS Disk. Conflicts with `secure_vm_disk_encryption_set_id`.
-- `disk_size_gb` - (Optional) The Size of the Internal OS Disk in GB, if you wish to vary from the size used in the image this Virtual Machine is sourced from.
-- `name` - (Optional) The name which should be used for the Internal OS Disk. Changing this forces a new resource to be created.
-- `secure_vm_disk_encryption_set_id` - (Optional) The ID of the Disk Encryption Set which should be used to Encrypt this OS Disk when the Virtual Machine is a Confidential VM. Conflicts with `disk_encryption_set_id`. Changing this forces a new resource to be created.
-- `security_encryption_type` - (Optional) Encryption Type when the Virtual Machine is a Confidential VM. Possible values are `VMGuestStateOnly` and `DiskWithVMGuestState`. Changing this forces a new resource to be created.
-- `storage_account_type` - (Required) The Type of Storage Account which should back this the Internal OS Disk. Possible values are `Standard_LRS`, `StandardSSD_LRS`, `Premium_LRS`, `StandardSSD_ZRS` and `Premium_ZRS`. Changing this forces a new resource to be created.
-- `write_accelerator_enabled` - (Optional) Should Write Accelerator be Enabled for this OS Disk? Defaults to `false`.
-
----
-`diff_disk_settings` block supports the following:
-- `option` - (Required) Specifies the Ephemeral Disk Settings for the OS Disk. At this time the only possible value is `Local`. Changing this forces a new resource to be created.
-- `placement` - (Optional) Specifies where to store the Ephemeral Disk. Possible values are `CacheDisk` and `ResourceDisk`. Defaults to `CacheDisk`. Changing this forces a new resource to be created.
-
-Type:
-
-```hcl
-object({
-    caching                          = string
-    disk_encryption_set_id           = optional(string)
-    disk_size_gb                     = optional(number)
-    name                             = optional(string)
-    secure_vm_disk_encryption_set_id = optional(string)
-    security_encryption_type         = optional(string)
-    storage_account_type             = string
-    write_accelerator_enabled        = optional(bool)
-    diff_disk_settings = optional(object({
-      option    = string
-      placement = optional(string)
-    }))
-  })
-```
-
-### <a name="input_windows_virtual_machine_resource_group_name"></a> [windows\_virtual\_machine\_resource\_group\_name](#input\_windows\_virtual\_machine\_resource\_group\_name)
-
-Description: (Required) The name of the Resource Group in which the Windows Virtual Machine should be exist. Changing this forces a new resource to be created.
-
-Type: `string`
-
-### <a name="input_windows_virtual_machine_size"></a> [windows\_virtual\_machine\_size](#input\_windows\_virtual\_machine\_size)
-
-Description: (Required) The SKU which should be used for this Virtual Machine, such as `Standard_F2`.
 
 Type: `string`
 
