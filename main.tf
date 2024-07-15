@@ -33,8 +33,8 @@ module "vm" {
   network_interfaces  = azurerm_network_interface.this.id
   sku_size            = var.vm_sku_size
   zone                = [1, 2, 3]
-
 }
+
 resource "azurerm_virtual_machine_extension" "this" {
   for_each = var.virtual_machine_extension
 
