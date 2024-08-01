@@ -21,11 +21,20 @@ resource "azurerm_role_assignment" "this" {
   skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
 }
 
+resource "random_string" "avd_local_admin_password" {
+  for_each = var.local_admin_password
+
+  length           = each.value.length
+  special          = each.value.special
+  override_special = each.value.override_special
+  min_special      = each.value.min_special
+}
+
 module "vm" {
   source  = "Azure/avm-res-compute-virtualmachine/azurerm"
-  version = "~> 0.15.0"
+  version = "0.15.0"
   # insert the 5 required variables here
-  admin_password      = var.admin_password
+  admin_password      = random_string.avd_local_admin_password[0].result
   admin_username      = var.admin_username
   location            = var.location
   name                = var.name
@@ -33,40 +42,54 @@ module "vm" {
   network_interfaces  = azurerm_network_interface.this.id
   sku_size            = var.vm_sku_size
   zone                = [1, 2, 3]
+  extensions = {
+    azure_monitor_agent = {
+      name                       = "AzureMonitorWindowsAgent"
+      publisher                  = "Microsoft.Azure.Monitor"
+      type                       = "AzureMonitorWindowsAgent"
+      type_handler_version       = "1.2"
+      auto_upgrade_minor_version = true
+      automatic_upgrade_enabled  = true
+      settings                   = null
+    }
+    avd_agent = {
+      name                       = "AVD-Agent"
+      publisher                  = "Microsoft.Powershell"
+      type                       = "DSC"
+      type_handler_version       = "2.73"
+      virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm.*.id[count.index]
+      auto_upgrade_minor_version = true
+      protected_settings         = <<PROTECTED_SETTINGS
+  {
+    "properties": {
+      "registrationInfoToken": "${local.registration_token}"
+    }
+  }
+PROTECTED_SETTINGS
+      settings                   = <<-SETTINGS
+    {
+      "modulesUrl": "https://wvdportalstorageblob.blob.core.windows.net/galleryartifacts/Configuration_1.0.02714.342.zip",
+      "configurationFunction": "Configuration.ps1\\AddSessionHost",
+      "properties": {
+        "HostPoolName":"${module.avm_res_desktopvirtualization_hostpool.resource.name}"
+      }
+    }
+SETTINGS
+    }
+    mal = {
+      name                       = "IaaSAntimalware"
+      publisher                  = "Microsoft.Azure.Security"
+      type                       = "IaaSAntimalware"
+      type_handler_version       = "1.3"
+      virtual_machine_id         = azurerm_windows_virtual_machine.avd_vm.*.id[count.index]
+      auto_upgrade_minor_version = "true"
+    }
+  }
 }
 
-resource "azurerm_virtual_machine_extension" "this" {
-  for_each = var.virtual_machine_extension
-
-  name                        = each.value.name
-  publisher                   = each.value.publisher
-  type                        = each.value.type
-  type_handler_version        = each.value.type_handler_version
-  virtual_machine_id          = each.value.virtual_machine_id
-  auto_upgrade_minor_version  = each.value.auto_upgrade_minor_version
-  automatic_upgrade_enabled   = each.value.automatic_upgrade_enabled
-  failure_suppression_enabled = each.value.failure_suppression_enabled
-  protected_settings          = each.value.protected_settings
-  provision_after_extensions  = each.value.provision_after_extensions
-  settings                    = each.value.settings
-  tags                        = each.value.tags
-
-  dynamic "protected_settings_from_key_vault" {
-    for_each = var.virtual_machine_extension.protected_settings_from_key_vault == null ? [] : [var.virtual_machine_extension.protected_settings_from_key_vault]
-    content {
-      secret_url      = protected_settings_from_key_vault.value.secret_url
-      source_vault_id = protected_settings_from_key_vault.value.source_vault_id
-    }
-  }
-  dynamic "timeouts" {
-    for_each = var.virtual_machine_extension.timeouts == null ? [] : [var.virtual_machine_extension.timeouts]
-    content {
-      create = timeouts.value.create
-      delete = timeouts.value.delete
-      read   = timeouts.value.read
-      update = timeouts.value.update
-    }
-  }
+resource "azurerm_virtual_desktop_host_pool_registration_info" "registrationinfo" {
+  expiration_date = timeadd(timestamp(), var.registration_expiration_period)
+  hostpool_id     = module.avm_res_desktopvirtualization_hostpool.resource.id
 }
 
 resource "azurerm_network_interface" "virtualmachine_network_interfaces" {

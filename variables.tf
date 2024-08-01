@@ -1,9 +1,3 @@
-variable "admin_password" {
-  type        = string
-  description = "The password of the local administrator on the Virtual Machine."
-  sensitive   = true
-}
-
 variable "admin_username" {
   type        = string
   description = "The username of the local administrator on the Virtual Machine."
@@ -190,34 +184,6 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed."
 }
 
-variable "virtual_machine_extension" {
-  type = object({
-    name                        = string
-    publisher                   = string
-    type                        = string
-    virtual_machine_id          = string
-    type_handler_version        = string
-    auto_upgrade_minor_version  = optional(bool)
-    automatic_upgrade_enabled   = optional(bool)
-    failure_suppression_enabled = optional(bool)
-    protected_settings          = optional(string)
-    protected_settings_from_key_vault = object({
-      secret_url      = optional(string)
-      source_vault_id = optional(string)
-    })
-    provision_after_extensions = optional(list(string))
-    settings                   = optional(string)
-    tags                       = optional(map(string))
-    timeouts = object({
-      create = optional(string)
-      delete = optional(string)
-      read   = optional(string)
-      update = optional(string)
-    })
-  })
-  description = "All attributes related to configuring a Virtual Machine Extension."
-}
-
 variable "vm_sku_size" {
   type        = string
   description = "The SKU size of the Virtual Machine."
@@ -364,4 +330,15 @@ variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "local_admin_password" {
+  type = object({
+    length           = number
+    special          = optional(bool)
+    override_special = optional(string)
+    min_special      = optional(number)
+  })
+  description = "The password of the local administrator on the Virtual Machine."
+  sensitive   = true
 }
