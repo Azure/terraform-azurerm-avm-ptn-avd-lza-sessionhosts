@@ -342,3 +342,9 @@ variable "local_admin_password" {
   description = "The password of the local administrator on the Virtual Machine."
   sensitive   = true
 }
+
+variable "registration_expiration_period" {
+  type        = string
+  default     = "48h"
+  description = "The duration that the registration token is valid for. The default is 1 hour."
+}

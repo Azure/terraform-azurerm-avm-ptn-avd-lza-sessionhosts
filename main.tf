@@ -5,14 +5,14 @@ resource "azurerm_management_lock" "this" {
 
   lock_level = var.lock.kind
   name       = coalesce(var.lock.name, "lock-${var.name}")
-  scope      = azurerm_TODO_resource.this.id
+  scope      = module.vm.resource_id
 }
 
 resource "azurerm_role_assignment" "this" {
   for_each = var.role_assignments
 
   principal_id                           = each.value.principal_id
-  scope                                  = azurerm_TODO_resource.this.id
+  scope                                  = module.vm.resource_id
   condition                              = each.value.condition
   condition_version                      = each.value.condition_version
   delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
@@ -33,15 +33,14 @@ resource "random_string" "avd_local_admin_password" {
 module "vm" {
   source  = "Azure/avm-res-compute-virtualmachine/azurerm"
   version = "0.15.0"
-  # insert the 5 required variables here
   admin_password      = random_string.avd_local_admin_password[0].result
   admin_username      = var.admin_username
   location            = var.location
   name                = var.name
   resource_group_name = var.resource_group_name
-  network_interfaces  = azurerm_network_interface.this.id
+  network_interfaces  = azurerm_network_interface.this[0].id
   sku_size            = var.vm_sku_size
-  zone                = [1, 2, 3]
+  zone                = ["1", "2", "3"]
   extensions = {
     azure_monitor_agent = {
       name                       = "AzureMonitorWindowsAgent"
@@ -92,7 +91,7 @@ resource "azurerm_virtual_desktop_host_pool_registration_info" "registrationinfo
   hostpool_id     = module.avm_res_desktopvirtualization_hostpool.resource.id
 }
 
-resource "azurerm_network_interface" "virtualmachine_network_interfaces" {
+resource "azurerm_network_interface" "this" {
   for_each = var.network_interfaces
 
   location                       = var.location

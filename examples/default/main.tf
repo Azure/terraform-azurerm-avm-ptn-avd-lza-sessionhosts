@@ -76,24 +76,4 @@ module "sessionhost" {
   location             = module.regions.regions[random_integer.region_index.result].name
   vm_sku_size          = "Standard_D2s_v3"
   network_interfaces   = azurerm_network_interface.this.id
-  virtual_machine_extension = {
-    "extension1" = {
-      name                        = "extension1"
-      publisher                   = "Microsoft.Compute"
-      type                        = "CustomScriptExtension"
-      type_handler_version        = "1.10"
-      virtual_machine_id          = azurerm_virtual_machine.this.id
-      auto_upgrade_minor_version  = true
-      automatic_upgrade_enabled   = true
-      failure_suppression_enabled = false
-      protected_settings = {
-        commandToExecute = "echo 'Hello, World!' > /tmp/hello-world.txt"
-      }
-      provision_after_extensions        = []
-      settings                          = null
-      tags                              = null
-      protected_settings_from_key_vault = null
-      timeouts                          = null
-    }
-  }
 }
