@@ -6,6 +6,7 @@ This deploys the module in its simplest form.
 ```hcl
 terraform {
   required_version = ">= 1.3.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -55,11 +56,12 @@ resource "azurerm_resource_group" "this" {
 # with a data source.
 module "test" {
   source = "../../"
+
+  name                = "" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
+  resource_group_name = azurerm_resource_group.this.name
   # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
   # ...
-  enable_telemetry    = var.enable_telemetry # see variables.tf
-  name                = ""                   # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
+  enable_telemetry = var.enable_telemetry # see variables.tf
 }
 ```
 
