@@ -62,7 +62,7 @@ module "test" {
   resource_group_name = azurerm_resource_group.this.name
   # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
   # ...
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  enable_telemetry = false # see variables.tf
 }
 ```
 
