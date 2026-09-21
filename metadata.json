@@ -4,5 +4,8 @@
   "moduleDescription": "AVM Pattern Module for AVD Session Hosts",
   "canonicalType": "avd-lza-sessionhosts",
   "owners": [],
-  "telemetryIdPrefix": "46d3xtrf.ptn.a0be411"
+  "telemetryIdPrefix": "46d3xtrf.ptn.a0be411",
+  "alternativeNames": [
+    "Azure Virtual Desktop Session Hosts"
+  ]
 }
