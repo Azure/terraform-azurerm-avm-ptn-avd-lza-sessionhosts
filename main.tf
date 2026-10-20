@@ -1,34 +1,28 @@
-# TODO: insert resources here.
-data "azurerm_resource_group" "parent" {
-  count = var.location == null ? 1 : 0
+resource "azapi_resource" "this" {
+  location  = var.location
+  name      = var.name
+  parent_id = var.parent_id
+  type      = var.resource_types.network_virtual_networks
+  body = {
+    properties = {
+      addressSpace = {
+        addressPrefixes = var.address_space
+      }
+    }
+  }
+  ignore_body_changes    = length(var.ignore_body_changes.network_virtual_networks) > 0 ? var.ignore_body_changes.network_virtual_networks : null
+  response_export_values = []
+  retry                  = var.retry
+  tags                   = var.tags
 
-  name = var.resource_group_name
-}
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
 
-resource "azurerm_TODO_the_resource_for_this_module" "this" {
-  name                = var.name # calling code must supply the name
-  resource_group_name = var.resource_group_name
-  location            = coalesce(var.location, local.resource_group_location)
-}
-
-# required AVM resources interfaces
-resource "azurerm_management_lock" "this" {
-  count = var.lock.kind != "None" ? 1 : 0
-
-  lock_level = var.lock.kind
-  name       = coalesce(var.lock.name, "lock-${var.name}")
-  scope      = azurerm_TODO_resource.this.id
-}
-
-resource "azurerm_role_assignment" "this" {
-  for_each = var.role_assignments
-
-  principal_id                           = each.value.principal_id
-  scope                                  = azurerm_TODO_resource.this.id
-  condition                              = each.value.condition
-  condition_version                      = each.value.condition_version
-  delegated_managed_identity_resource_id = each.value.delegated_managed_identity_resource_id
-  role_definition_id                     = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_resource_substring)) ? each.value.role_definition_id_or_name : null
-  role_definition_name                   = strcontains(lower(each.value.role_definition_id_or_name), lower(local.role_definition_resource_substring)) ? null : each.value.role_definition_id_or_name
-  skip_service_principal_aad_check       = each.value.skip_service_principal_aad_check
+    content {
+      create = timeouts.value.create
+      delete = timeouts.value.delete
+      read   = timeouts.value.read
+      update = timeouts.value.update
+    }
+  }
 }
